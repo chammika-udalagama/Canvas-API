@@ -29,22 +29,44 @@ class CAPI:
             return None
 
 
+class CComm:
+
+    def __init__(self, parent_name, verbosity=True) -> None:
+        self.parent_name = parent_name
+        self.verbosity = verbosity
+
+    def print(self, msg):
+        msg = f'{self.parent_name}: {msg}'
+        print(msg)
+
+
 class CCanvas:
 
-    def __init__(self, api_token) -> None:
+    def __init__(self, api_token, course_id=None) -> None:
+        self.comm = CComm(parent_name='CCanvas')
         self.api = CAPI(api_token=api_token)
+
+        if course_id is None:
+            self.comm.print(
+                'Please rerun and specify one of the following course IDs')
+
+            self.my_course_info()
+        else:
+            
 
     def my_course_info(self):
 
-        response=self.api.ask('')
+        response = self.api.ask('')
 
         if response is not None:
             courses = response.json()
 
-            for course in courses:
-                print(f"{course['name']} (ID: {course['id']})")
+            # for course in courses:
+            #     print(f"{course['name']} (ID: {course['id']})")
+            df_course_info = pd.DataFrame(courses)
+            print(df_course_info[['name', 'id']])
 
-#%%
+# %%
 
-canvas = CCanvas(API_TOKEN)            
-canvas.my_course_info()
+
+canvas = CCanvas(API_TOKEN, course_id=7471)
