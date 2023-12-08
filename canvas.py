@@ -1,19 +1,17 @@
-from datetime import datetime
 import pandas as pd
-from constants import API_TOKEN
 from comms import CComm
 from api import CAPI
 
 
 class CCanvas:
-
     def __init__(self, api_token, course_id=None) -> None:
         self.comm = CComm(parent_name='CCanvas')
         self.api = CAPI(api_token=api_token)
 
         if course_id is None:
             self.comm.print(
-                'Please rerun and specify one of the following course IDs')
+                'Please rerun and specify one of the following course IDs'
+            )
 
             self.get_all_my_courses()
             return None
@@ -57,7 +55,7 @@ class CCanvas:
         response = self.api.delete(CAPI.DELETE_QUIZ, item_id=quiz_id)
 
         if response is not None:
-            self.comm.print(f'Quiz {quiz_id} successfuly deleted.')
+            self.comm.print(f'Quiz {quiz_id} successfully deleted.')
 
     def list_quizzes(self):
         response = self.api.ask(CAPI.GET_ALL_QUIZ_INFO)
@@ -74,41 +72,3 @@ class CCanvas:
             return None
         else:
             return pd.DataFrame(response.json())
-
-
-count = 0
-
-# %%
-count += 1
-# canvas = CCanvas(API_TOKEN)
-canvas = CCanvas(API_TOKEN, course_id=7471)
-
-
-timing = {
-    'start': datetime.strptime('2024-12-12 18:00', '%Y-%m-%d %H:%M'),
-    'end': datetime.strptime('2024-12-24 23:00', '%Y-%m-%d %H:%M')
-}
-
-quiz_info = {}
-
-quiz_info['quiz'] = {
-    'title': f'My API Test Quiz {count}',
-    'description': 'Wooooo Haaaa',
-    'quiz_type': 'assignment',
-    'unlock_at': timing['start'].isoformat(),
-    'due_at': timing['end'].isoformat(),
-    'published': False,
-    'time_limit': None,  # In minutes
-    'shuffle_answers': True,
-    'allowed_attempts': 1,
-    'hide_results': 'until_after_last_attempt'
-}
-
-# canvas.delete_quiz(30536)
-
-canvas.create_quiz(quiz_info=quiz_info)
-ids = canvas.list_quizzes()
-
-for id in ids:
-    canvas.delete_quiz(id)
-
