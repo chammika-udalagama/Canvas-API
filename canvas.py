@@ -72,3 +72,16 @@ class CCanvas:
             return None
         else:
             return pd.DataFrame(response.json())
+
+    @staticmethod
+    def create_question_list_for_canvas(df_question_bank, quiz_id):
+        mask = df_question_bank['my_quiz_id'] == quiz_id
+        columns_to_keep = ['question_text', 'correct_comments',
+                           'answers', 'question_type', 'points_possible']
+        question_info_dict = df_question_bank.loc[mask,
+                                                  columns_to_keep].T.to_dict()
+
+        question_info = [{'question': question_info_dict[key]}
+                         for key in question_info_dict.keys()]
+
+        return question_info
