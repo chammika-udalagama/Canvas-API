@@ -14,6 +14,18 @@ def extract_quiz_info(filename):
 
     return df
 
+def expand_question_bank(df):
+    df['my_quiz_id'] = df['my_quiz_id'].str.split(',')
+
+    df_expanded = pd.DataFrame(columns=df.columns)
+
+    for index, row in df.iterrows():
+        for quiz_id in row['my_quiz_id']:
+            new_index = len(df_expanded)
+            df_expanded.loc[new_index] = row
+            df_expanded.loc[new_index, 'my_quiz_id'] = quiz_id
+
+    return df_expanded
 
 def extract_question_bank(filename):
     df = pd.read_excel(filename, sheet_name='Question Bank')
@@ -25,8 +37,9 @@ def extract_question_bank(filename):
         'Rationale for Correct Answer']
 
     df = df[columns_to_keep]
-
     df.columns = [column.lower().replace(' ', '_') for column in df.columns]
+
+    df = expand_question_bank(df)
 
     # Create answer list
     answer_columns = ['a', 'b', 'c', 'd', 'e']
@@ -47,3 +60,4 @@ def extract_question_bank(filename):
 
 df_quiz_info = extract_quiz_info(filename)
 df_question_bank = extract_question_bank(filename)
+df_question_bank
