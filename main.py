@@ -1,6 +1,7 @@
 from datetime import datetime
 from constants import API_TOKEN
 from canvas import CCanvas
+from convert_excel import extract_quiz_info, extract_question_bank
 
 count = 0
 
@@ -32,9 +33,27 @@ quiz_info['quiz'] = {
 
 # canvas.delete_quiz(30536)
 
-canvas.create_quiz(quiz_info=quiz_info)
-ids = canvas.list_quizzes()
+# canvas.create_quiz(quiz_info=quiz_info)
+# ids = canvas.list_quizzes()
 
 # for id in ids:
 #     canvas.delete_quiz(id)
 
+# %%
+filename = 'Canvas Question Bank.xlsx'
+df_quiz_info = extract_quiz_info(filename)
+df_question_bank = extract_question_bank(filename)
+
+my_quiz_id = 'Quiz_1'
+
+quiz_info = {}
+quiz_info['quiz'] = df_quiz_info.loc[my_quiz_id].to_dict()
+new_quiz = canvas.create_quiz(quiz_info)
+
+question_info = new_quiz.add_questions(
+    df_question_bank=df_question_bank,                                                quiz_id=quiz_id
+)
+
+# canvas.
+
+# %%
