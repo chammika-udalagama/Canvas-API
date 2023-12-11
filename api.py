@@ -7,20 +7,26 @@ class CAPI:
     GET_ALL_MY_COURSES = 0
     GET_MY_COURSE_INFO = 1
     CREATE_NEW_QUIZ = 2
-    GET_ALL_QUIZ_INFO = 3
-    DELETE_QUIZ = 4
+    ADD_QUESTIONS_TO_QUIZ = 3
+    GET_ALL_QUIZ_INFO = 4
+    DELETE_QUIZ = 5
 
-    def __init__(self, api_token) -> None:
+    TARGET_COURSES = 'courses'
+    TARGET_QUIZZES = 'quizzes'
+
+    def __init__(self, api_token, target_type='courses') -> None:
+        self.api_token = api_token
         self.headers = {
-            'Authorization': f'Bearer {api_token}',
+            'Authorization': f'Bearer {self.api_token}',
             'Content-Type': 'application/json',
         }
+        self.target_type = target_type
         self.comm = CComm(parent_name='CAPI')
         self.actions = {}
         self.actions[CAPI.GET_ALL_MY_COURSES] = ''
 
     def rqst(self, action, item_id=None):
-        cmd = f'{self.API_URL}/api/v1/courses/'
+        cmd = f'{self.API_URL}/api/v1/{self.target_type}/'
         cmd += self.actions[action]
         if action in [CAPI.DELETE_QUIZ]:
             cmd += f'/{item_id}'
