@@ -1,18 +1,26 @@
 import pandas as pd
 from datetime import datetime
 
-filename = 'Canvas Question Bank.xlsx'
-
 
 def extract_quiz_info(filename):
+    print(f'Extracting quiz information from Excel file ({filename}).')
     df = pd.read_excel(filename, sheet_name='Quiz Info')
-
     df.columns = [column.lower().replace(' ', '_') for column in df.columns]
-
     time_columns = ['unlock_at', 'due_at', 'show_correct_answers_at']
     df[time_columns] = df[time_columns].applymap(datetime.isoformat)
 
+    df['time_limit'] = df['time_limit'].apply(
+        lambda limit: None if limit == 0 else limit)
+
+    quiz_ids = df['my_quiz_id'].unique().tolist()
+    print(f'I found the following {len(quiz_ids)} unique quiz ids:')
+    for index, quiz_id in enumerate(quiz_ids, start=1):
+        print(index, ':', quiz_id)
+
+    df.set_index('my_quiz_id', inplace=True)
+
     return df
+
 
 def expand_question_bank(df):
     df['my_quiz_id'] = df['my_quiz_id'].str.split(',')
@@ -27,21 +35,16 @@ def expand_question_bank(df):
 
     return df_expanded
 
+
 def extract_question_bank(filename):
     df = pd.read_excel(filename, sheet_name='Question Bank')
-
-    columns_to_keep = [
-        'My Quiz ID',
-        'Question Text',
-        'A', 'B', 'C', 'D', 'E',
-        'Rationale for Correct Answer']
-
-    df = df[columns_to_keep]
     df.columns = [column.lower().replace(' ', '_') for column in df.columns]
-
     df = expand_question_bank(df)
 
-    # Create answer list
+    df.rename(
+        columns={'rationale_for_correct_answer': 'correct_comments'}, inplace=True)
+
+    # Create answer list in the format accepted by Canvas
     answer_columns = ['a', 'b', 'c', 'd', 'e']
     df['a'] = df['a'].apply(lambda cell: {'text': cell, 'weight': 100})
 
@@ -57,7 +60,5 @@ def extract_question_bank(filename):
 
     return df
 
-
-df_quiz_info = extract_quiz_info(filename)
-df_question_bank = extract_question_bank(filename)
-df_question_bank
+# df_quiz_info = extract_quiz_info(filename)
+# df_question_bank = extract_question_bank(filename)
