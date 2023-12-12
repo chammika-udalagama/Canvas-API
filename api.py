@@ -1,6 +1,6 @@
 import requests
 from comms import CComm
-
+from time import sleep
 
 class CAPI:
     API_URL = "https://canvas.nus.edu.sg"
@@ -10,6 +10,8 @@ class CAPI:
     ADD_QUESTIONS_TO_QUIZ = 3
     GET_ALL_QUIZ_INFO = 4
     DELETE_QUIZ = 5
+
+    time_to_breathe = 2
 
     def __init__(self, api_token) -> None:
         self.api_token = api_token
@@ -26,7 +28,7 @@ class CAPI:
         cmd += self.actions[action]
         if action in [CAPI.DELETE_QUIZ]:
             cmd += f'/{item_id}'
-        self.comm.print(cmd)
+        # self.comm.print(cmd)
         return cmd
 
     @staticmethod
@@ -42,6 +44,9 @@ class CAPI:
             self.rqst(action),
             headers=self.headers
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)
 
     def do(self, action, json_data=None):
@@ -50,6 +55,9 @@ class CAPI:
             headers=self.headers,
             json=json_data
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)
 
     def delete(self, action, item_id):
@@ -57,4 +65,7 @@ class CAPI:
             self.rqst(action, item_id=item_id),
             headers=self.headers,
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)

@@ -1,34 +1,8 @@
 import pandas as pd
 from comms import CComm
 from api import CAPI
-
-
-class CCanvasQuiz:
-    def __init__(self, quiz_id, api_token) -> None:
-        self.comm = CComm(parent_name=f'CCanvasQuiz({quiz_id})')
-        self.api = CAPI(api_token=api_token, target_type=CAPI.TARGET_QUIZZES)
-
-        self.my_quiz_id = quiz_id
-
-        # Add items to API action list
-        self.api.actions[CAPI.ADD_QUESTIONS_TO_QUIZ] = f'{self.my_quiz_id}/questions'
-
-        msg = f"New quiz with id {quiz_id} successfully created."
-        self.comm.print(msg)
-
-        @staticmethod
-        def create_question_list_for_canvas(df_question_bank, quiz_id):
-            mask = df_question_bank['my_quiz_id'] == quiz_id
-            columns_to_keep = ['question_text', 'correct_comments',
-                               'answers', 'question_type', 'points_possible']
-            question_info_dict = df_question_bank.loc[mask,
-                                                      columns_to_keep].T.to_dict()
-
-            question_info = [{'question': question_info_dict[key]}
-                             for key in question_info_dict.keys()]
-
-            return question_info
-
+from canvas_quiz import CCanvasQuiz
+# from datetime import datetime
 
 class CCanvas:
     def __init__(self, api_token, course_id=None) -> None:
@@ -36,18 +10,16 @@ class CCanvas:
         self.api = CAPI(api_token=api_token)
 
         if course_id is None:
-            self.comm.print(
-                'Please rerun and specify one of the following course IDs'
-            )
+            self.comm.print('Please rerun and specify one of the following course IDs')
 
             self.get_all_my_courses()
             return None
 
-        self.my_course_id = course_id
+        self.canvas_course_id = course_id
 
         # Add items to API action list
-        self.api.actions[CAPI.GET_MY_COURSE_INFO] = f'{self.my_course_id}'
-        self.api.actions[CAPI.CREATE_NEW_QUIZ] = f'{self.my_course_id}/quizzes'
+        self.api.actions[CAPI.GET_MY_COURSE_INFO] = f'{self.canvas_course_id}'
+        self.api.actions[CAPI.CREATE_NEW_QUIZ] = f'{self.canvas_course_id}/quizzes'
         self.api.actions[CAPI.GET_ALL_QUIZ_INFO] = self.api.actions[CAPI.CREATE_NEW_QUIZ]
         self.api.actions[CAPI.DELETE_QUIZ] = self.api.actions[CAPI.CREATE_NEW_QUIZ]
 
@@ -70,23 +42,51 @@ class CCanvas:
 
             self.comm.print(msg)
 
-    def create_quiz(self, quiz_info):
+    def create_quiz(self, df_quiz_info, my_quiz_label):
+        '''
+        This method accepts all quiz information and uses the lower level methos create_new_quiz() to implement quiz creation.
+        '''
+
+        mask = df_quiz_info['my_quiz_label'] == my_quiz_label
+
+        quiz_info = df_quiz_info.loc[mask].T.to_dict()
+
+        # We need the key to be 'quiz' so...
+        only_key = list(quiz_info.keys())[0]
+        quiz_info['quiz'] = quiz_info.pop(only_key)
+
+        # timing = {
+        #     'start': datetime.strptime('2024-12-12 18:00', '%Y-%m-%d %H:%M'),
+        #     'end': datetime.strptime('2024-12-24 23:00', '%Y-%m-%d %H:%M')
+        # }
+
+        # quiz_info_x = {}
+
+        # quiz_info_x['quiz'] = {
+        #     'title': f'My API Test Quiz {111}',
+        #     'description': 'Wooooo Haaaa',
+        #     'quiz_type': 'assignment',
+        #     'unlock_at': timing['start'].isoformat(),
+        #     'due_at': timing['end'].isoformat(),
+        #     'published': False,
+        #     'time_limit': None,  # In minutes
+        #     'shuffle_answers': True,
+        #     'allowed_attempts': 1,
+        #     'hide_results': 'until_after_last_attempt'
+        # }
+
+        return self.create_a_new_quiz(quiz_info)
+
+    def create_a_new_quiz(self, quiz_info):
         response = self.api.do(CAPI.CREATE_NEW_QUIZ, json_data=quiz_info)
-        # df = CCanvas.response_to_dataframe(response)
 
         if response is not None:
-            new_quiz_id = response.json()['id']
+            canvas_quiz_id = response.json()['id']
             return CCanvasQuiz(
-                quiz_id=new_quiz_id,
+                canvas_quiz_id=canvas_quiz_id,
+                canvas_course_id=self.canvas_course_id,
+                my_quiz_label=quiz_info['quiz']['my_quiz_label'],
                 api_token=self.api.api_token)
-
-    def add_quesitions_ti_quiz(self, quiz_id, question_info):
-        response = self.api.do(CAPI.CREATE_NEW_QUIZ, json_data=quiz_info)
-        # df = CCanvas.response_to_dataframe(response)
-
-        if response is not None:
-            msg = f"New quiz with id {response.json()['id']} successfully created."
-            self.comm.print(msg)
 
     def delete_quiz(self, quiz_id):
         response = self.api.delete(CAPI.DELETE_QUIZ, item_id=quiz_id)

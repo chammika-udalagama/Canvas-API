@@ -58,7 +58,8 @@ class CCanvasQuiz:
                 self.comm.print(msg)
 
     def create_question_list_for_canvas(self, df_question_bank):
-        mask = df_question_bank['my_quiz_label'] == self.my_quiz_label
+        mask=df_question_bank['my_quiz_label'].str.contains(self.my_quiz_label)
+
         columns_to_keep = ['question_text', 'correct_comments',
                            'answers', 'question_type', 'points_possible']
         question_info_dict = df_question_bank.loc[mask,
@@ -66,5 +67,5 @@ class CCanvasQuiz:
 
         question_info = [{'question': question_info_dict[key]}
                          for key in question_info_dict.keys()]
-
+        
         return question_info
