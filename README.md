@@ -1,15 +1,3 @@
----
-title: "Using the Canvas LMS API with Python"
-description: "Some code to use the Canvas API to create and populate quizzes."
-
-# date: 10-24-2022
-draft: false 
-categories: [Python, Canvas, API] # self-defined categories
-# citation: 
-#   url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
-image: python-canvas-api.png
----
-
 # How to talk to Canvas, programmatically
 
 [Canvas](https://www.canvas.com/) is a popular commercial LMS our university recently migrated to. Canvas offers an API^[API: **A**pplication **P**rogramme **I**nterface] to implement typical LMS activities.
@@ -23,12 +11,8 @@ In this post, I will share some code I wrote to create and populate MCQ quizzes.
 - The code lives on the Github repository: [github.com/chammika-udalagama/Canvas-API](https://github.com/chammika-udalagama/Canvas-API).<br>If you are new to Github you can just download the repository as a zip file and then unzip, and you are ready to go.
 - Requirements:
   - You will need Python installed on your machine. Alternatively, you can use a service like Google's Colab, but be careful about keeping your API-KEY secure (see below).
-  <!-- - You will need to install the following Python packages:<br>
-    `x` -->
 
 # How to use the code
-
-:::{.panel-tabset}
 
 ## Typical Workflow
 
@@ -74,4 +58,3 @@ Once you have prepared your Excel file, you can just run the script in the termi
 python main.py
 ```
 
-:::
