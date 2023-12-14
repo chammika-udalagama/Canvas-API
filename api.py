@@ -1,6 +1,6 @@
 import requests
 from comms import CComm
-
+from time import sleep
 
 class CAPI:
     API_URL = "https://canvas.nus.edu.sg"
@@ -11,26 +11,24 @@ class CAPI:
     GET_ALL_QUIZ_INFO = 4
     DELETE_QUIZ = 5
 
-    TARGET_COURSES = 'courses'
-    TARGET_QUIZZES = 'quizzes'
+    time_to_breathe = 2
 
-    def __init__(self, api_token, target_type='courses') -> None:
+    def __init__(self, api_token) -> None:
         self.api_token = api_token
         self.headers = {
             'Authorization': f'Bearer {self.api_token}',
             'Content-Type': 'application/json',
         }
-        self.target_type = target_type
         self.comm = CComm(parent_name='CAPI')
         self.actions = {}
         self.actions[CAPI.GET_ALL_MY_COURSES] = ''
 
     def rqst(self, action, item_id=None):
-        cmd = f'{self.API_URL}/api/v1/{self.target_type}/'
+        cmd = f'{self.API_URL}/api/v1/courses/'
         cmd += self.actions[action]
         if action in [CAPI.DELETE_QUIZ]:
             cmd += f'/{item_id}'
-        self.comm.print(cmd)
+        # self.comm.print(cmd)
         return cmd
 
     @staticmethod
@@ -46,6 +44,9 @@ class CAPI:
             self.rqst(action),
             headers=self.headers
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)
 
     def do(self, action, json_data=None):
@@ -54,6 +55,9 @@ class CAPI:
             headers=self.headers,
             json=json_data
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)
 
     def delete(self, action, item_id):
@@ -61,4 +65,7 @@ class CAPI:
             self.rqst(action, item_id=item_id),
             headers=self.headers,
         )
+
+        sleep(self.time_to_breathe)
+
         return self.check_status(response)
